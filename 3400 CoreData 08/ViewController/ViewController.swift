@@ -16,6 +16,9 @@ extension NSNotification.Name {
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     @IBOutlet weak var outletTableView: UITableView!
+    @IBOutlet var noData: UIView!
+    
+    let heightForRow: CGFloat = 82.00
     var listInfor = [InforManager]()
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
     var managerObjectContext: NSManagedObjectContext?
@@ -24,6 +27,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         super.viewDidLoad()
         
         managerObjectContext = appDelegate.persistentContainer.viewContext
+        
+        title = "Contacts"
         
         outletTableView.delegate = self
         outletTableView.dataSource = self
@@ -34,6 +39,11 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         super.viewWillAppear(animated)
         outletTableView.reloadData()
         loadData()
+        if listInfor.count == 0 {
+            outletTableView.tableFooterView = noData
+        } else {
+            outletTableView.tableFooterView = UIView()
+        }
     }
     
     func loadData() {
@@ -55,6 +65,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! MyTableViewCell
         cell.inforStudent = listInfor[indexPath.row]
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return heightForRow
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -86,6 +100,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             listInfor.remove(at: indexPath.row)
             outletTableView.deleteRows(at: [indexPath], with: .automatic)
             appDelegate.saveContext()
+            if listInfor.count == 0 {
+                outletTableView.tableFooterView = noData
+            }
         }
     }
     
