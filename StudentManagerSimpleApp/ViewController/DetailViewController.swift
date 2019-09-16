@@ -1,22 +1,22 @@
 //
-//  MyViewController.swift
-//  3400 CoreData 08
+//  DetailViewController.swift
+//  StudentManagerSimpleApp
 //
-//  Created by Trương Quang on 7/15/19.
+//  Created by Trương Quang on 9/16/19.
 //  Copyright © 2019 truongquang. All rights reserved.
 //
 
 import UIKit
 import CoreData
 
-class MyViewController: UIViewController {
+class DetailViewController: UIViewController {
     
-    @IBOutlet weak var outletImage: UIImageView!
+    @IBOutlet weak var avatar: UIImageView!
     @IBOutlet weak var name: UITextField!
-    @IBOutlet weak var phonenumber: UITextField!
+    @IBOutlet weak var phoneNumber: UITextField!
     @IBOutlet weak var address: UITextField!
     
-    var inforStudent: InforManager?
+    var inforContact: InforContact?
     let imagePicker = UIImagePickerController()
     var moc: NSManagedObjectContext?
     
@@ -25,25 +25,33 @@ class MyViewController: UIViewController {
         
         fillInfor()
         imagePicker.delegate = self
-        outletImage.isUserInteractionEnabled = true
+        avatar.isUserInteractionEnabled = true
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(addPhoto))
-        outletImage.addGestureRecognizer(tapGesture)
+        avatar.addGestureRecognizer(tapGesture)
+        
         self.view.addGestureRecognizer(UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing(_:))))
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(didTapSave))
+    }
+    
+    override func viewDidLayoutSubviews() {
+        avatar.layer.cornerRadius = avatar.bounds.width / 2
+        avatar.layer.borderWidth = 1
+        avatar.layer.borderColor = UIColor.lightGray.cgColor
+        avatar.layer.masksToBounds = true
     }
     
     func fillInfor() {
-        if let infor = inforStudent {
-            outletImage.image = UIImage(data: infor.image as! Data)
+        if let infor = inforContact {
+            if let data = inforContact?.image as Data? {
+                avatar.image = UIImage(data: data)
+            }
             name.text = infor.name
-            phonenumber.text = infor.phonenumber
+            phoneNumber.text = infor.phoneNumber
             address.text = infor.address
         } else {
-            outletImage.image = UIImage(named: "nophoto.jpg")
+            avatar.image = UIImage(named: "nophoto.jpg")
         }
-        outletImage.layer.cornerRadius = outletImage.bounds.width / 2
-        outletImage.layer.borderWidth = 1
-        outletImage.layer.borderColor = UIColor.lightGray.cgColor
-        outletImage.layer.masksToBounds = true
     }
     
     @objc func addPhoto() {
@@ -77,34 +85,33 @@ class MyViewController: UIViewController {
         present(alertController, animated: true, completion: nil)
     }
     
-    @IBAction func save(_ sender: Any) {
-        guard let imageData = outletImage.image?.pngData() else { return }
-        guard let name = name.text?.trimmingCharacters(in: .whitespacesAndNewlines), let phonenumber = phonenumber.text?.trimmingCharacters(in: .whitespacesAndNewlines) else { return }
+    @objc func didTapSave(_ sender: UIBarButtonItem) {
+        guard let imageData = avatar.image?.pngData() else { return }
+        guard let name = name.text?.trimmingCharacters(in: .whitespacesAndNewlines), let phonenumber = phoneNumber.text?.trimmingCharacters(in: .whitespacesAndNewlines) else { return }
         guard let address = address.text else { return }
         if !name.isEmpty && !phonenumber.isEmpty {
             guard let moc = self.moc else {return}
-            if let inforStudent = inforStudent {
-                inforStudent.name = name
-                inforStudent.phonenumber = phonenumber
-                inforStudent.address = address
-                inforStudent.image = imageData as NSData
-                NotificationCenter.default.post(name: .passDataVC2, object: inforStudent)
+            if let inforContact = inforContact {
+                inforContact.name = name
+                inforContact.phoneNumber = phonenumber
+                inforContact.address = address
+                inforContact.image = imageData as NSData
+                NotificationCenter.default.post(name: .passDataFromDetailVC, object: inforContact)
             } else {
-                let inforStudent = InforManager(context: moc)
-                inforStudent.name = name
-                inforStudent.phonenumber = phonenumber
-                inforStudent.address = address
-                inforStudent.image = imageData as NSData
-                NotificationCenter.default.post(name: .passDataVC2, object: inforStudent)
+                let inforContact = InforContact(context: moc)
+                inforContact.name = name
+                inforContact.phoneNumber = phonenumber
+                inforContact.address = address
+                inforContact.image = imageData as NSData
+                NotificationCenter.default.post(name: .passDataFromDetailVC, object: inforContact)
             }
         } else {
             return showAlert(message: "You must input name and phone number")
         }
     }
     
-    
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
-        if (name.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)! || (phonenumber.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)! {
+        if (name.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)! || (phoneNumber.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)! {
             return false
         } else {
             return true
@@ -117,16 +124,17 @@ class MyViewController: UIViewController {
         alertController.addAction(okAction)
         present(alertController, animated: true, completion: nil)
     }
+
 }
 
-extension MyViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+extension DetailViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         dismiss(animated: true, completion: nil)
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         let choose = info[UIImagePickerController.InfoKey.originalImage] as? UIImage
-        outletImage.image = choose
+        avatar.image = choose
         dismiss(animated: true, completion: nil)
     }
 }

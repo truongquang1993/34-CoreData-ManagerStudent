@@ -1,8 +1,8 @@
 //
 //  AppDelegate.swift
-//  3400 CoreData 08
+//  StudentManagerSimpleApp
 //
-//  Created by Trương Quang on 7/15/19.
+//  Created by Trương Quang on 9/16/19.
 //  Copyright © 2019 truongquang. All rights reserved.
 //
 
@@ -53,7 +53,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
          application to it. This property is optional since there are legitimate
          error conditions that could cause the creation of the store to fail.
         */
-        let container = NSPersistentContainer(name: "_400_CoreData_08")
+        let container = NSPersistentContainer(name: "StudentManagerSimpleApp")
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
                 // Replace this implementation with code to handle the error appropriately.
